@@ -5,6 +5,10 @@ buildscript {
   repositories {
     google()
     mavenCentral()
+    //  maven{
+    //     allowInsecureProtocol = true
+    //     url 'https://www.jitpack.io'
+    // }
   }
 
   dependencies {
@@ -85,6 +89,10 @@ android {
 repositories {
   mavenCentral()
   google()
+  //  maven{
+  //       allowInsecureProtocol = true
+  //       url 'https://www.jitpack.io'
+  //   }
 }
 
 def kotlin_version = getExtOrDefault("kotlinVersion")
@@ -95,5 +103,7 @@ dependencies {
   //noinspection GradleDynamicVersion
   implementation "com.facebook.react:react-native:+"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation files('libs/Android_Print_SDK_ESC_V1.18.jar')
+
 }
 
