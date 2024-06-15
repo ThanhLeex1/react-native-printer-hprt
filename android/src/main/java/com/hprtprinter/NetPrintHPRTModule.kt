@@ -20,7 +20,6 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 
 class NetPrintHPRTModule(context: ReactApplicationContext) : ReactContextBaseJavaModule(context)  , PrinterHelper {
-    private val listDevice: WritableArray = Arguments.createArray()
 
     override fun getName(): String {
         return "NetPrintHPRTModule"
@@ -80,13 +79,13 @@ class NetPrintHPRTModule(context: ReactApplicationContext) : ReactContextBaseJav
 
             }
 
-    override fun updateSerialNumberForDevice(device: UsbDevice) {
+    override fun updateDeviceHasPermission(useDevice : UsbDevice? , hasPermission : Boolean) {
         TODO("Not yet implemented")
     }
 
     private fun getDeviceUdp(data : Array<String> , promise: Promise) {
         Log.d("TAG", "test$data")
-
+        val listDevice: WritableArray = Arguments.createArray()
         val deviceInfo: WritableMap = Arguments.createMap().apply {
             putString("model",data[5])
             putString("macAddress", data[4])

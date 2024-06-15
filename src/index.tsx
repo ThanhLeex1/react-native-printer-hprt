@@ -1,12 +1,25 @@
 /* eslint-disable no-bitwise */
 import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
-import type {
+import {
+  PrinterInterface,
+  type HprtPrinterInfo,
+  type HprtPrinterType,
+  type OptionPrinter,
+  type PrinterImage,
+  type PrinterStatus,
+  type StatusDrawer,
+} from './typing';
+
+export type {
   HprtPrinterInfo,
   HprtPrinterType,
+  OptionPrinter,
   PrinterImage,
+  PrinterInterface,
   PrinterStatus,
-} from './typing';
-import { PrinterInterface } from './typing';
+  StatusDrawer,
+};
+const VENDER_ID_TP808 = 8401;
 const LINKING_ERROR =
   `The package 'hprt-printer' doesn't seem to be linked. Make sure: \n\n` +
   Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +
@@ -45,13 +58,59 @@ const UsbPrinter = NativeModules.UsbPrintHPRTModule
     );
 
 const PrinterHprt: HprtPrinterType = {
-  async getDevices(interfacePrinter: PrinterInterface) {
+  async discoveryDevices(
+    interfacePrinter: PrinterInterface,
+    onPrinterFound,
+    onFinished
+  ) {
     try {
-      const result =
+      let totalPrinters = 0;
+      let processedPrinters = 0;
+
+      //listner device granted permession
+      const eventEmitter = new NativeEventEmitter(
+        NativeModules.HprtPrinterModule
+      );
+      const eventListener = eventEmitter.addListener(
+        'KEY_UPDATE_LIST_DEVICE',
+        (printer: HprtPrinterInfo) => {
+          processedPrinters++;
+          onPrinterFound && onPrinterFound(printer);
+          if (processedPrinters >= totalPrinters) {
+            onFinished();
+            eventListener.remove();
+          }
+        }
+      );
+
+      const result: HprtPrinterInfo[] =
         interfacePrinter === PrinterInterface.USB
           ? await UsbPrinter.getDevices()
           : await NetPrinter.getDevices();
-      return result;
+
+      let printers = result.filter((item) => item.vendorId === VENDER_ID_TP808);
+      totalPrinters = printers.length;
+      if (interfacePrinter === PrinterInterface.USB && totalPrinters > 0) {
+        for (const printer of printers) {
+          let hasPermission = await UsbPrinter.hasPermissionUSB(
+            printer.vendorId,
+            printer.productId
+          );
+          if (!hasPermission) {
+            UsbPrinter.requestPermissionUSB(
+              printer.vendorId,
+              printer.productId
+            );
+          } else {
+            onPrinterFound && onPrinterFound(printer);
+            processedPrinters++;
+          }
+        }
+      } else {
+        for (const printer of printers) {
+          onPrinterFound(printer);
+        }
+      }
     } catch (error) {
       console.error('Error fetching devices:', error);
       throw error;
@@ -149,7 +208,9 @@ const PrinterHprt: HprtPrinterType = {
   listenEvent(
     callBackHandle: (payload: { eventName: string; eventData: any }) => void
   ) {
-    const eventEmitter = new NativeEventEmitter(NativeModules.PrinterImin);
+    const eventEmitter = new NativeEventEmitter(
+      NativeModules.HprtPrinterModule
+    );
     const eventListener = eventEmitter.addListener(
       'eventEmiter',
       (payload: { eventName: string; eventData: any }) => {

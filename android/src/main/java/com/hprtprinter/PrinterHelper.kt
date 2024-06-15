@@ -6,5 +6,5 @@ import com.facebook.react.bridge.ReadableMap
 
 interface PrinterHelper {
     fun getDevices(promise: Promise)
-    fun updateSerialNumberForDevice(device: UsbDevice)
+    fun updateDeviceHasPermission(device: UsbDevice? , hasPermission : Boolean)
 }

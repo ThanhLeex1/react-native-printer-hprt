@@ -25,7 +25,7 @@ export interface HprtPrinterInfo {
   ipDevice: string;
   macAddress: string;
   status: string;
-  interfacePrinter: string;
+  interfacePrinter: PrinterInterface;
 }
 
 export enum PrinterInterface {
@@ -44,10 +44,20 @@ export interface StatusDrawer {
   isOpen: boolean;
 }
 
+interface OnDiscoveryFinished {
+  (): void;
+}
+
+interface OnPrinterFounnd {
+  (printer: HprtPrinterInfo): void;
+}
+
 export type HprtPrinterType = {
-  getDevices: (
-    interfacePrinter: PrinterInterface
-  ) => Promise<HprtPrinterInfo[]>;
+  discoveryDevices: (
+    interfacePrinter: PrinterInterface,
+    OnPrinterFounnd: OnPrinterFounnd,
+    onFinished: OnDiscoveryFinished
+  ) => Promise<void>;
   getPrinterSN: () => Promise<string>;
   openCashDrawer: () => Promise<number>;
   getCashDrawer: () => Promise<StatusDrawer>;
