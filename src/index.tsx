@@ -5,19 +5,20 @@ import {
   type HprtPrinterInfo,
   type HprtPrinterType,
   type OptionPrinter,
+  type PrinterConnection,
   type PrinterImage,
   type PrinterStatus,
   type StatusDrawer,
 } from './typing';
 
-export type {
-  HprtPrinterInfo,
-  HprtPrinterType,
-  OptionPrinter,
-  PrinterImage,
+export {
   PrinterInterface,
-  PrinterStatus,
-  StatusDrawer,
+  type HprtPrinterInfo,
+  type HprtPrinterType,
+  type OptionPrinter,
+  type PrinterImage,
+  type PrinterStatus,
+  type StatusDrawer,
 };
 const VENDER_ID_TP808 = 8401;
 const LINKING_ERROR =
@@ -87,7 +88,6 @@ const PrinterHprt: HprtPrinterType = {
         interfacePrinter === PrinterInterface.USB
           ? await UsbPrinter.getDevices()
           : await NetPrinter.getDevices();
-
       let printers = result.filter((item) => item.vendorId === VENDER_ID_TP808);
       totalPrinters = printers.length;
       if (interfacePrinter === PrinterInterface.USB && totalPrinters > 0) {
@@ -109,31 +109,20 @@ const PrinterHprt: HprtPrinterType = {
       } else {
         for (const printer of printers) {
           onPrinterFound(printer);
+          onFinished();
         }
       }
     } catch (error) {
       console.error('Error fetching devices:', error);
+      onFinished();
       throw error;
     }
   },
-  async onConnect(printer: HprtPrinterInfo) {
+  async onConnect(printer: PrinterConnection) {
     if (!printer) {
       throw 'Not found printer';
     }
     try {
-      if (printer?.interfacePrinter === PrinterInterface.USB) {
-        const hasPermission = await UsbPrinter.hasPermissionUSB(
-          printer?.vendorId,
-          printer?.productId
-        );
-        if (!hasPermission) {
-          return await UsbPrinter.requestPermissionUSB(
-            printer?.vendorId,
-            printer?.productId
-          );
-        }
-      }
-
       return await HprtPrinter.connectDevice(printer);
     } catch (error) {
       console.error('Error onConnect:', error);

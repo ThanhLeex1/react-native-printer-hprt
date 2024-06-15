@@ -58,25 +58,19 @@ open class HprtPrinterModule(context: ReactApplicationContext) : ReactContextBas
             Print.PortClose()
         }
        try {
-        val interfacePrinter = params.getString("interfacePrinter")
-            ?: return promise.reject("MISSING_PARAM", "interfacePrinter is required")
+        val interfacePrinter = params.getString("interface")
+        val identifier = params.getString("identifier")
 
         if (interfacePrinter == "USB") {
-            val vendorId = params.getInt("vendorId")
-            val productId = params.getInt("productId")
-
-            // Tìm thiết bị USB theo vendorId và productId
-            val useDevice = usbManager.deviceList.values.find { it.vendorId == vendorId && it.productId == productId }
-                ?: return promise.reject("Error", "DEVICE_NOT_FOUND: $vendorId and productId: $productId")
-
+            // Tìm thiết bị USB theo 
+            val useDevice = usbManager.deviceList.values.find { it.serialNumber == identifier}
+                ?: return promise.reject("Error", "DEVICE_NOT_FOUND")
+            Log.d("TAG" , "" + useDevice)
             val result = Print.PortOpen(reactApplicationContext, useDevice)
             promise.resolve(result)
 
         } else if (interfacePrinter == "LAN") {
-            val ipDevice = params.getString("ipDevice")
-                ?: return promise.reject("MISSING_PARAM", "ipDevice is required for WiFi connection")
-
-            val result = Print.PortOpen(reactApplicationContext, "WiFi,$ipDevice,9100")
+            val result = Print.PortOpen(reactApplicationContext, "WiFi,$identifier,9100")
             promise.resolve(result)
         } else {
             promise.reject("INVALID_INTERFACE", "interfacePrinter must be either 'USB' or 'LAN'")

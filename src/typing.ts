@@ -14,7 +14,29 @@ export interface HprtPrinterInfo {
   deviceName: string;
   version: string;
   manufacturerName: string;
-  serialnumber: string;
+  serialNumber: string;
+  productName: string;
+  vendorId: number;
+  productId: number;
+  deviceId: number;
+  deviceProtocol: number;
+  deviceClass: number;
+  deviceSubclass: number;
+  ipDevice: string;
+  macAddress: string;
+  status: string;
+  interfacePrinter: PrinterInterface;
+}
+export interface PrinterConnection {
+  interface: PrinterInterface;
+  identifier: string;
+}
+
+export interface HprtPrinterInfo {
+  deviceName: string;
+  version: string;
+  manufacturerName: string;
+  serialNumber: string;
   productName: string;
   vendorId: number;
   productId: number;
@@ -63,7 +85,7 @@ export type HprtPrinterType = {
   getCashDrawer: () => Promise<StatusDrawer>;
   getPrintStatus: () => Promise<PrinterStatus>;
   cutPaper: () => Promise<PrinterStatus>;
-  onConnect: (printer: HprtPrinterInfo) => Promise<void>;
+  onConnect: (printer: PrinterConnection) => Promise<void>;
   onDisConnect: () => Promise<void>;
   listenEvent: (
     callBackHandle: (payload: { eventName: string; eventData: any }) => void

@@ -47,7 +47,11 @@ class UsbPrintHPRTModule(context: ReactApplicationContext) : ReactContextBaseJav
             val deviceList: HashMap<String, UsbDevice> = usbManager.deviceList
             val writableArray: WritableArray = Arguments.createArray()
             for (useDevice in deviceList.values) {
-              
+                              var serialNumber =  "Not available"
+                if(hasPermissionUSB(useDevice.vendorId ,useDevice.productId , null  ) && useDevice.serialNumber != null ){
+                    serialNumber =  useDevice.serialNumber.toString()
+                }
+
                 val deviceInfo: WritableMap = Arguments.createMap().apply {
                     putString("deviceName", useDevice.deviceName)
                     putInt("deviceId", useDevice.deviceId)
@@ -60,6 +64,8 @@ class UsbPrintHPRTModule(context: ReactApplicationContext) : ReactContextBaseJav
                     putString("productName", useDevice.manufacturerName)
                     putString("productName", useDevice.version)
                     putString("interfacePrinter", "USB")
+                     putString("serialNumber", serialNumber)
+
                 }
                 writableArray.pushMap(deviceInfo)
             }
@@ -83,10 +89,10 @@ class UsbPrintHPRTModule(context: ReactApplicationContext) : ReactContextBaseJav
                     putInt("productId", useDevice.productId)
                     putInt("deviceClass", useDevice.deviceClass)
                     putInt("deviceSubclass", useDevice.deviceSubclass)
-                    putInt("productName", useDevice.deviceProtocol)
+                    putInt("deviceProtocol", useDevice.deviceProtocol)
                     putString("productName", useDevice.productName)
-                    putString("productName", useDevice.manufacturerName)
-                    putString("productName", useDevice.version)
+                    putString("manufacturerName", useDevice.manufacturerName)
+                    putString("version", useDevice.version)
                     putString("serialNumber",  useDevice.serialNumber.toString())
                     putString("interfacePrinter", "USB")
                 }
@@ -127,7 +133,7 @@ class UsbPrintHPRTModule(context: ReactApplicationContext) : ReactContextBaseJav
                 reactApplicationContext,
                 0,
                 Intent(ACTION_USB_PERMISSION),
-                PendingIntent.FLAG_UPDATE_CURRENT
+                PendingIntent.FLAG_MUTABLE
             )
 
             // Create an IntentFilter for USB permission broadcast
