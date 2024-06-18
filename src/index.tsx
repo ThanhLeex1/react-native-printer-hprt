@@ -19,8 +19,9 @@ export {
   type PrinterImage,
   type PrinterStatus,
   type StatusDrawer,
+  type PrinterConnection,
 };
-const VENDER_ID_TP808 = 8401;
+const arrVenderId = [8401];
 const LINKING_ERROR =
   `The package 'hprt-printer' doesn't seem to be linked. Make sure: \n\n` +
   Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +
@@ -76,21 +77,25 @@ const PrinterHprt: HprtPrinterType = {
         'KEY_UPDATE_LIST_DEVICE',
         (printer: HprtPrinterInfo) => {
           processedPrinters++;
-          onPrinterFound && onPrinterFound(printer);
+          if (onPrinterFound && !!printer.serialNumber) {
+            onPrinterFound(printer);
+          }
           if (processedPrinters >= totalPrinters) {
             onFinished();
             eventListener.remove();
           }
         }
       );
-
       const result: HprtPrinterInfo[] =
         interfacePrinter === PrinterInterface.USB
           ? await UsbPrinter.getDevices()
           : await NetPrinter.getDevices();
-      let printers = result.filter((item) => item.vendorId === VENDER_ID_TP808);
+      let printers =
+        interfacePrinter === PrinterInterface.USB
+          ? result.filter((item) => arrVenderId.includes(item.vendorId))
+          : result;
       totalPrinters = printers.length;
-      if (interfacePrinter === PrinterInterface.USB && totalPrinters > 0) {
+      if (interfacePrinter === PrinterInterface.USB) {
         for (const printer of printers) {
           let hasPermission = await UsbPrinter.hasPermissionUSB(
             printer.vendorId,
@@ -104,13 +109,17 @@ const PrinterHprt: HprtPrinterType = {
           } else {
             onPrinterFound && onPrinterFound(printer);
             processedPrinters++;
+            if (processedPrinters >= totalPrinters) {
+              onFinished();
+              eventListener.remove();
+            }
           }
         }
       } else {
         for (const printer of printers) {
           onPrinterFound(printer);
-          onFinished();
         }
+        onFinished();
       }
     } catch (error) {
       console.error('Error fetching devices:', error);
@@ -123,14 +132,28 @@ const PrinterHprt: HprtPrinterType = {
       throw 'Not found printer';
     }
     try {
-      return await HprtPrinter.connectDevice(printer);
+      const printerRequest = { ...printer };
+      if (printer.interface === PrinterInterface.LAN) {
+        const result: HprtPrinterInfo[] = await NetPrinter.getDevices();
+        const printerLan = result.find(
+          (item) => item.serialNumber === printerRequest.identifier
+        );
+        printerRequest.identifier = printerLan?.ipDevice || '';
+      }
+
+      return await HprtPrinter.connectDevice(printerRequest);
     } catch (error) {
       console.error('Error onConnect:', error);
       throw error;
     }
   },
   async onDisConnect() {
-    return HprtPrinter.disConnectDevice();
+    try {
+      return await HprtPrinter.disConnectDevice();
+    } catch (error) {
+      console.error('Error onDisConnect:', error);
+      throw error;
+    }
   },
   async printImage(request: PrinterImage) {
     try {
@@ -177,17 +200,16 @@ const PrinterHprt: HprtPrinterType = {
   },
   async getPrintStatus() {
     try {
-      const [resPrinter, resPaper, resThePrinter] = await Promise.all([
+      const [resPrinter, resPaper] = await Promise.all([
         HprtPrinter.getPrintStatus(2),
         HprtPrinter.getPrintStatus(4),
-        HprtPrinter.getPrintStatus(1),
       ]);
-      console.log(resThePrinter);
 
       const statusPrinter: PrinterStatus = {
-        isOpen: (resPrinter | 4) === 4,
-        hasPaper: (resPaper | 96) !== 96,
-        nearEndPaper: (resPaper | 12) === 12,
+        isOpen: (resPrinter & 4) === 4,
+        hasPaper: (resPaper & 96) !== 96,
+        nearEndPaper: (resPaper & 12) === 12,
+        isNomal: !((resPrinter & 4) === 4) && (resPaper & 96) !== 96,
       };
       return statusPrinter;
     } catch (error) {

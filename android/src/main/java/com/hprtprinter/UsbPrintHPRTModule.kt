@@ -59,10 +59,10 @@ class UsbPrintHPRTModule(context: ReactApplicationContext) : ReactContextBaseJav
                     putInt("productId", useDevice.productId)
                     putInt("deviceClass", useDevice.deviceClass)
                     putInt("deviceSubclass", useDevice.deviceSubclass)
-                    putInt("productName", useDevice.deviceProtocol)
+                    putInt("deviceProtocol", useDevice.deviceProtocol)
                     putString("productName", useDevice.productName)
-                    putString("productName", useDevice.manufacturerName)
-                    putString("productName", useDevice.version)
+                    putString("manufacturerName", useDevice.manufacturerName)
+                    putString("version", useDevice.version)
                     putString("interfacePrinter", "USB")
                      putString("serialNumber", serialNumber)
 

@@ -42,7 +42,7 @@ open class HprtPrinterModule(context: ReactApplicationContext) : ReactContextBas
     @ReactMethod
     fun openCashDrawer(openMode : Int ,promise : Promise) {
         if (!Print.IsOpened()) {
-            promise.reject("Error", "Please connect printer")
+            promise.resolve(null)
         }
         try {
             val result = Print.OpenCashdrawer(openMode);
@@ -54,18 +54,15 @@ open class HprtPrinterModule(context: ReactApplicationContext) : ReactContextBas
 
         @ReactMethod
      fun connectDevice(params: ReadableMap, promise: Promise) {
-        if(Print.IsOpened()){
-            Print.PortClose()
-        }
+     
        try {
         val interfacePrinter = params.getString("interface")
         val identifier = params.getString("identifier")
 
         if (interfacePrinter == "USB") {
             // Tìm thiết bị USB theo 
-            val useDevice = usbManager.deviceList.values.find { it.serialNumber == identifier}
-                ?: return promise.reject("Error", "DEVICE_NOT_FOUND")
-            Log.d("TAG" , "" + useDevice)
+            val useDevice = usbManager.deviceList.values.find { usbManager.hasPermission(it) && it.serialNumber == identifier}
+                ?: return promise.reject("DEVICE_NOT_FOUND", "Not found device %s" + identifier )
             val result = Print.PortOpen(reactApplicationContext, useDevice)
             promise.resolve(result)
 
@@ -79,24 +76,25 @@ open class HprtPrinterModule(context: ReactApplicationContext) : ReactContextBas
         promise.reject("UNKNOWN_ERROR", "An unknown error occurred: ${e.message}", e)
     }
     }
+    
     @ReactMethod
     private fun getPrintStatus(realTimeItem : Int , promise: Promise) {
         if (!Print.IsOpened()) {
-            promise.reject("Error","Please connect printer")
+            promise.resolve(null)
         }
             try {
             val bytes = Print.GetRealTimeStatus(realTimeItem.toByte())
             Log.d("TAG" , "bytes %s" + bytes[0].toInt())
            promise.resolve(bytes[0].toInt())
         } catch (e: java.lang.Exception) {
-            promise.reject("Error", "e123123")
+            promise.reject("UNKNOWN_ERROR", e)
         }
     }
 
     @ReactMethod
     private fun getCashDrawer(promise: Promise) {
         if (!Print.IsOpened()) {
-            promise.reject("Error", "Please connect printer")
+            promise.resolve(null)
         }
         try {
             Print.WriteData(byteArrayOf(0x1D, 0x72, 0x02))
@@ -116,7 +114,7 @@ open class HprtPrinterModule(context: ReactApplicationContext) : ReactContextBas
     @ReactMethod
     private fun getPrinterSN(promise: Promise){
         if (!Print.IsOpened()) {
-            promise.reject("Error", "Please connect printer")
+            promise.resolve(null)
         }
         try {
             val printSN = Print.getPrintSN()
@@ -137,7 +135,7 @@ open class HprtPrinterModule(context: ReactApplicationContext) : ReactContextBas
     @ReactMethod
     private fun disConnectDevice(promise: Promise){
         if (!Print.IsOpened()) {
-            return 
+        promise.resolve(null)
         }
         try {
             val result = Print.PortClose()
