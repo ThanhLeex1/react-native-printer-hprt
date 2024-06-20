@@ -62,7 +62,7 @@ open class HprtPrinterModule(context: ReactApplicationContext) : ReactContextBas
         if (interfacePrinter == "USB") {
             // Tìm thiết bị USB theo 
             val useDevice = usbManager.deviceList.values.find { usbManager.hasPermission(it) && it.serialNumber == identifier}
-                ?: return promise.reject("DEVICE_NOT_FOUND", "Not found device %s" + identifier )
+                ?: return promise.reject("DEVICE_NOT_FOUND", "Not found device ")
             val result = Print.PortOpen(reactApplicationContext, useDevice)
             promise.resolve(result)
 
@@ -70,7 +70,7 @@ open class HprtPrinterModule(context: ReactApplicationContext) : ReactContextBas
             val result = Print.PortOpen(reactApplicationContext, "WiFi,$identifier,9100")
             promise.resolve(result)
         } else {
-            promise.reject("INVALID_INTERFACE", "interfacePrinter must be either 'USB' or 'LAN'")
+            promise.reject("INVALID_INTERFACE", "InterfacePrinter must be either 'USB' or 'LAN'")
         }
     } catch (e: Exception) {
         promise.reject("UNKNOWN_ERROR", "An unknown error occurred: ${e.message}", e)

@@ -55,7 +55,7 @@ class NetPrintHPRTModule(context: ReactApplicationContext) : ReactContextBaseJav
                 val responsePacket = DatagramPacket(responseData, responseData.size)
     val listDevice: WritableArray = Arguments.createArray()
 
-                socket.soTimeout = 3000
+                socket.soTimeout = 500
 
                 while (true) {
                     try {

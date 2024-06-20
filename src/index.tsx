@@ -143,7 +143,6 @@ const PrinterHprt: HprtPrinterType = {
 
       return await HprtPrinter.connectDevice(printerRequest);
     } catch (error) {
-      console.error('Error onConnect:', error);
       throw error;
     }
   },
@@ -151,7 +150,6 @@ const PrinterHprt: HprtPrinterType = {
     try {
       return await HprtPrinter.disConnectDevice();
     } catch (error) {
-      console.error('Error onDisConnect:', error);
       throw error;
     }
   },
@@ -204,6 +202,9 @@ const PrinterHprt: HprtPrinterType = {
         HprtPrinter.getPrintStatus(2),
         HprtPrinter.getPrintStatus(4),
       ]);
+      if (!resPrinter && !resPaper) {
+        throw new Error('Please check connection');
+      }
 
       const statusPrinter: PrinterStatus = {
         isOpen: (resPrinter & 4) === 4,
@@ -213,7 +214,7 @@ const PrinterHprt: HprtPrinterType = {
       };
       return statusPrinter;
     } catch (error) {
-      throw error;
+      throw new Error('Please check connection');
     }
   },
   listenEvent(

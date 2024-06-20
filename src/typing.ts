@@ -85,7 +85,7 @@ export type HprtPrinterType = {
   getCashDrawer: () => Promise<StatusDrawer>;
   getPrintStatus: () => Promise<PrinterStatus>;
   cutPaper: () => Promise<PrinterStatus>;
-  onConnect: (printer: PrinterConnection) => Promise<void>;
+  onConnect: (printer: PrinterConnection) => Promise<number>;
   onDisConnect: () => Promise<void>;
   listenEvent: (
     callBackHandle: (payload: { eventName: string; eventData: any }) => void
