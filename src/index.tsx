@@ -203,7 +203,7 @@ const PrinterHprt: HprtPrinterType = {
         HprtPrinter.getPrintStatus(4),
       ]);
       if (!resPrinter && !resPaper) {
-        throw new Error('Please check connection');
+        return { isConnected: false } as PrinterStatus;
       }
 
       const statusPrinter: PrinterStatus = {
@@ -211,10 +211,11 @@ const PrinterHprt: HprtPrinterType = {
         hasPaper: (resPaper & 96) !== 96,
         nearEndPaper: (resPaper & 12) === 12,
         isNomal: !((resPrinter & 4) === 4) && (resPaper & 96) !== 96,
+        isConnected: true,
       };
       return statusPrinter;
     } catch (error) {
-      throw new Error('Please check connection');
+      return { isConnected: false } as PrinterStatus;
     }
   },
   listenEvent(

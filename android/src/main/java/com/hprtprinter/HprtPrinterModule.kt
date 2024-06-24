@@ -41,9 +41,7 @@ open class HprtPrinterModule(context: ReactApplicationContext) : ReactContextBas
 
     @ReactMethod
     fun openCashDrawer(openMode : Int ,promise : Promise) {
-        if (!Print.IsOpened()) {
-            promise.resolve(null)
-        }
+       
         try {
             val result = Print.OpenCashdrawer(openMode);
             promise.resolve(result)
@@ -79,9 +77,6 @@ open class HprtPrinterModule(context: ReactApplicationContext) : ReactContextBas
     
     @ReactMethod
     private fun getPrintStatus(realTimeItem : Int , promise: Promise) {
-        if (!Print.IsOpened()) {
-            promise.resolve(null)
-        }
             try {
             val bytes = Print.GetRealTimeStatus(realTimeItem.toByte())
             Log.d("TAG" , "bytes %s" + bytes[0].toInt())
@@ -89,6 +84,22 @@ open class HprtPrinterModule(context: ReactApplicationContext) : ReactContextBas
         } catch (e: java.lang.Exception) {
             promise.reject("UNKNOWN_ERROR", e)
         }
+    }
+
+    private fun isConnected() : Boolean {
+            try {
+                            Log.d("TAG" , "isConnected check" )
+
+            val res =  Print.IsOpened()
+                     Log.d("TAG" , "isConnected %s" + res )
+return res
+        } catch (e: java.lang.Exception) {
+                                 Log.d("TAG" , "isConnected false"  )
+
+            return false
+        }
+                    return false
+
     }
 
     @ReactMethod
@@ -113,9 +124,7 @@ open class HprtPrinterModule(context: ReactApplicationContext) : ReactContextBas
 
     @ReactMethod
     private fun getPrinterSN(promise: Promise){
-        if (!Print.IsOpened()) {
-            promise.resolve(null)
-        }
+        
         try {
             val printSN = Print.getPrintSN()
             Log.d("printSN", printSN)
@@ -134,9 +143,7 @@ open class HprtPrinterModule(context: ReactApplicationContext) : ReactContextBas
 
     @ReactMethod
     private fun disConnectDevice(promise: Promise){
-        if (!Print.IsOpened()) {
-        promise.resolve(null)
-        }
+        
         try {
             val result = Print.PortClose()
             promise.resolve(result)

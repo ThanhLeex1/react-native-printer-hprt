@@ -60,6 +60,7 @@ export interface PrinterStatus {
   hasPaper?: boolean;
   nearEndPaper?: boolean;
   isNomal?: boolean;
+  isConnected?: boolean;
 }
 
 export interface StatusDrawer {
