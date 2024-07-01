@@ -82,24 +82,8 @@ open class HprtPrinterModule(context: ReactApplicationContext) : ReactContextBas
             Log.d("TAG" , "bytes %s" + bytes[0].toInt())
            promise.resolve(bytes[0].toInt())
         } catch (e: java.lang.Exception) {
-            promise.reject("UNKNOWN_ERROR", e)
+           promise.resolve(null)
         }
-    }
-
-    private fun isConnected() : Boolean {
-            try {
-                            Log.d("TAG" , "isConnected check" )
-
-            val res =  Print.IsOpened()
-                     Log.d("TAG" , "isConnected %s" + res )
-return res
-        } catch (e: java.lang.Exception) {
-                                 Log.d("TAG" , "isConnected false"  )
-
-            return false
-        }
-                    return false
-
     }
 
     @ReactMethod

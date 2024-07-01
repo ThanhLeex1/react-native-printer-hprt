@@ -215,7 +215,7 @@ const PrinterHprt: HprtPrinterType = {
       };
       return statusPrinter;
     } catch (error) {
-      return { isConnected: false } as PrinterStatus;
+      throw error;
     }
   },
   listenEvent(
