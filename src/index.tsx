@@ -1,5 +1,5 @@
 /* eslint-disable no-bitwise */
-import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
+import { NativeEventEmitter, NativeModules } from 'react-native';
 import {
   PrinterInterface,
   type HprtPrinterInfo,
@@ -16,48 +16,22 @@ export {
   type HprtPrinterInfo,
   type HprtPrinterType,
   type OptionPrinter,
+  type PrinterConnection,
   type PrinterImage,
   type PrinterStatus,
   type StatusDrawer,
-  type PrinterConnection,
 };
 const arrVenderId = [8401];
-const LINKING_ERROR =
-  `The package 'hprt-printer' doesn't seem to be linked. Make sure: \n\n` +
-  Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +
-  '- You rebuilt the app after installing the package\n' +
-  '- You are not using Expo Go\n';
 
 const HprtPrinter = NativeModules.HprtPrinterModule
   ? NativeModules.HprtPrinterModule
-  : new Proxy(
-      {},
-      {
-        get() {
-          throw new Error(LINKING_ERROR);
-        },
-      }
-    );
+  : {};
 const NetPrinter = NativeModules.NetPrintHPRTModule
   ? NativeModules.NetPrintHPRTModule
-  : new Proxy(
-      {},
-      {
-        get() {
-          throw new Error(LINKING_ERROR);
-        },
-      }
-    );
+  : {};
 const UsbPrinter = NativeModules.UsbPrintHPRTModule
   ? NativeModules.UsbPrintHPRTModule
-  : new Proxy(
-      {},
-      {
-        get() {
-          throw new Error(LINKING_ERROR);
-        },
-      }
-    );
+  : {};
 
 const PrinterHprt: HprtPrinterType = {
   async discoveryDevices(
